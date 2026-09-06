@@ -3,7 +3,7 @@
 ; 也可手动：先 dotnet publish（见 build.ps1），把 exe 放入 publish\ 后运行 ISCC installer.iss
 
 #define MyAppName "米家三合一切换器"
-#define MyAppVersion "1.4.8"
+#define MyAppVersion "1.0.0"
 #define MyAppExeName "米家三合一切换器.exe"
 
 [Setup]

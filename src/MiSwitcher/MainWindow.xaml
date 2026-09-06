@@ -82,7 +82,7 @@
                                         <TextBlock Text="  采集 Persistent" FontSize="12.5" VerticalAlignment="Center" />
                                     </StackPanel>
                                 </Button>
-                                <TextBlock x:Name="FooterText" Text="v1.4.8" FontSize="10"
+                                <TextBlock x:Name="FooterText" Text="v1.0.0" FontSize="10"
                                            Foreground="#66FFFFFF" Margin="6,12,0,0" />
                             </StackPanel>
 
