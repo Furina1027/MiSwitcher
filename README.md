@@ -74,17 +74,60 @@ B服组件原样保留。输出位置自动定位切换器安装目录，也可�
 - **切换后进游戏报「游戏数据异常 31-4302」**：游戏目录多了/少了文件，检查镜像与游戏版本是否一致
 - **跨区切换后首次进服大量下载**：按需内容随进度下载属正常现象；下载完成后「采集 Persistent」即可固化
 
-## 构建 / 打包
+## 构建与打包
 
-```
+### 环境要求
+
+| 工具 | 用途 | 说明 |
+|---|---|---|
+| .NET 9 SDK | 编译主程序（WPF） | [dotnet.microsoft.com](https://dotnet.microsoft.com/download/dotnet/9.0) |
+| Inno Setup 6.3+ | 制作安装包 | 默认装在 `%LOCALAPPDATA%\Programs\Inno Setup 6\`，装在别处请改 `build.ps1` 里的 `$iscc` 路径 |
+| Git LFS | clone/提交 时还原大文件 | Git for Windows 自带，首次使用前执行一次 `git lfs install` |
+| Python 3.10+（可选） | 替换包生成脚本 | 需 `pip install zstandard` |
+
+> 仓库中的 `libcef.dll`（112MB）由 Git LFS 管理：未装 LFS 时 clone 下来只是一个指针文本，
+> 执行 `git lfs install && git lfs pull` 即可还原。
+
+### 从源码运行（调试）
+
+```powershell
+git clone https://github.com/Furina1027/MiSwitcher.git
+cd MiSwitcher
+git lfs install
+git lfs pull                     # 还原 LFS 大文件
 cd src\MiSwitcher
-dotnet build -c Release          # 依赖 .NET 9 SDK（WPF）
-dotnet run -c Release
+dotnet run -c Release            # 直接运行（NuGet 依赖 WpfAnimatedGif，自动还原）
 ```
 
-- 一键构建安装包：`powershell -ExecutionPolicy Bypass -File build.ps1`（dotnet publish + Inno Setup）
-- 依赖 NuGet：`WpfAnimatedGif`（GIF 动图皮肤渲染）
-- 安装包默认内置「芙芙·当前背景」皮肤与三游戏 B服组件，其余皮肤可手动放入「背景图」文件夹
+### 打包安装器
+
+```powershell
+# 一键：单文件发布 -> 编译 Inno Setup 安装包
+powershell -ExecutionPolicy Bypass -File build.ps1
+```
+
+`build.ps1` 依次执行：
+
+1. `dotnet publish`（单文件自包含，无需目标机安装 .NET 运行时）
+2. 复制主程序到 `publish\`
+3. 调用 ISCC 编译 `installer.iss` → 产物：`安装包\米家三合一切换器-Setup-<版本>.exe`
+
+不想用脚本时可手动执行等价命令（完整参数见 `build.ps1`）：
+
+```powershell
+cd src\MiSwitcher
+dotnet publish -c Release -r win-x64 --self-contained true `
+  -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true
+copy .in\Release
+et9.0-windows\win-x64\publish\米家三合一切换器.exe ..\..\publish& "$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe" ..\..\installer.iss
+```
+
+安装包内置：主程序、中文安装向导、默认背景图「芙芙·当前背景」、三游戏 B服组件
+（PCGameSDK.dll + BLPlatform64 登录框，三游戏共用同一份，安装时分别复制）。
+
+### 替换包生成（可选）
+
+给镜像补齐/更新两服差异文件用，用法见上方「资源替换包」一节。
 
 ## 致谢
 
